@@ -45,12 +45,13 @@ struct MoodView: View {
                             .foregroundColor(.secondary)
 
                     }
-                    .padding()
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-
+                    .padding(20)
+                    .glassCardStyle()
+                    
+                    Spacer()
+                    Spacer()
+                    Spacer()
                 } else {
-
                     Text("How are you feeling?")
                         .foregroundColor(.secondary)
 
@@ -76,15 +77,17 @@ struct MoodView: View {
                                 .foregroundColor(.secondary)
 
                         }
-                        .padding()
-                        .background(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                        .padding(20)
+                        .glassCardStyle()
+                        Spacer()
+                        Spacer()
+                        Spacer()
                     }
                 }
             }
             .padding()
         }
-        .background(Color(.systemGroupedBackground))
+        .background(AppBackground())
         .navigationTitle("Mood")
     }
 
@@ -101,10 +104,12 @@ struct MoodView: View {
         } label: {
 
             Text(emoji)
-                .font(.system(size: 30))
-                .frame(width: 56, height: 56)
-                .background(Color.white)
+                .font(.system(size: 34))
+                .frame(width: 64, height: 64)
+                .background(Theme.glassOverlay2)
                 .clipShape(Circle())
+                .shadow(color: Theme.accentPink.opacity(0.1), radius: 10)
+                .overlay(Circle().stroke(Theme.glassBorder, lineWidth: 1))
         }
     }
 

@@ -120,13 +120,13 @@ struct JournalView: View {
                 )
                 
                 saveButton
+                Spacer()
+                Spacer()
+                Spacer()
             }
             .padding(18)
         }
-        .background(
-            Color(red: 0.99, green: 0.97, blue: 0.97)
-                .ignoresSafeArea()
-        )
+        .background(AppBackground())
         .navigationTitle("Journal")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: expected) { _ in markChanged() }
@@ -149,10 +149,11 @@ extension JournalView {
         VStack(alignment: .leading, spacing: 8) {
             
             Text("Gentle Check-In")
-                .font(.system(size: 28, weight: .bold))
+                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .foregroundColor(Theme.textPrimary)
             
             Text("Reflect in taps, not paragraphs.")
-                .foregroundColor(.secondary)
+                .foregroundColor(Theme.textSecondary)
         }
     }
     
@@ -165,18 +166,16 @@ extension JournalView {
         VStack(alignment: .leading, spacing: 12) {
             
             Text(title)
-                .font(.headline)
+                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .foregroundColor(Theme.textPrimary)
             
             FlexibleButtons(
                 options: options,
                 selection: selection
             )
         }
-        .padding(16)
-        .background(.white)
-        .clipShape(
-            RoundedRectangle(cornerRadius: 22)
-        )
+        .padding(20)
+        .glassCardStyle()
     }
     
     func textInputBlock(
@@ -188,7 +187,8 @@ extension JournalView {
         VStack(alignment: .leading, spacing: 12) {
             
             Text(title)
-                .font(.headline)
+                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .foregroundColor(Theme.textPrimary)
             
             TextField(
                 placeholder,
@@ -196,17 +196,14 @@ extension JournalView {
             )
             .padding(14)
             .background(
-                Color.gray.opacity(0.08)
+                Theme.glassOverlay1
             )
             .clipShape(
                 RoundedRectangle(cornerRadius: 14)
             )
         }
-        .padding(16)
-        .background(.white)
-        .clipShape(
-            RoundedRectangle(cornerRadius: 22)
-        )
+        .padding(20)
+        .glassCardStyle()
     }
     
     var saveButton: some View {
@@ -222,7 +219,7 @@ extension JournalView {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(.pink)
+                        .background(Theme.accentPink)
                         .clipShape(
                             RoundedRectangle(cornerRadius: 18)
                         )
@@ -285,16 +282,16 @@ struct FlexibleButtons: View {
                         .font(.subheadline)
                         .foregroundColor(
                             selection == item
-                            ? .pink
-                            : .black
+                            ? Theme.accentPink
+                            : Theme.textPrimary
                         )
                         .padding(.vertical, 10)
                         .padding(.horizontal, 12)
                         .frame(maxWidth: .infinity)
                         .background(
                             selection == item
-                            ? Color.pink.opacity(0.12)
-                            : Color.gray.opacity(0.08)
+                            ? Theme.accentPink.opacity(0.15)
+                            : Theme.glassOverlay1
                         )
                         .clipShape(
                             RoundedRectangle(cornerRadius: 14)

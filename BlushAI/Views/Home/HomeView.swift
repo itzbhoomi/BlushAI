@@ -46,19 +46,15 @@ struct HomeView: View {
                     }
                     
                     insightCard
+                    Spacer()
+                    Spacer()
+                    Spacer()
                 }
                 .padding(.horizontal, 18)
                 .padding(.top, 8)
                 .padding(.bottom, 30)
             }
-            .background(
-                Color(
-                    red: 0.99,
-                    green: 0.97,
-                    blue: 0.97
-                )
-                .ignoresSafeArea()
-            )
+            .background(AppBackground())
             .task {
                 await loadHomeData()
                 checkMoodLoggedToday()
@@ -82,11 +78,12 @@ extension HomeView {
             VStack(alignment: .leading, spacing: 4) {
                 
                 Text(greetingText())
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(.black.opacity(0.75))
+                    .font(.system(size: 20, weight: .medium, design: .rounded))
+                    .foregroundColor(Theme.textSecondary)
                 
                 Text(userName)
-                    .font(.system(size: 34, weight: .bold))
+                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                    .foregroundColor(Theme.textPrimary)
             }
             
             Spacer()
@@ -145,17 +142,8 @@ extension HomeView {
             .foregroundColor(.secondary)
             .padding(.top, 4)
         }
-        .padding(15)
-        .background(
-            RoundedRectangle(cornerRadius: 26)
-                .fill(
-                    Color(
-                        red: 1.0,
-                        green: 0.93,
-                        blue: 0.95
-                    )
-                )
-        )
+        .padding(18)
+        .glassCardStyle()
     }
     
     var moodCard: some View {
@@ -183,8 +171,8 @@ extension HomeView {
             VStack(alignment: .leading, spacing: 10) {
                 
                 Text("Mood")
-                    .font(.headline)
-                    .foregroundColor(.black)
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .foregroundColor(Theme.textPrimary)
                 
                 Spacer()
                 
@@ -212,10 +200,7 @@ extension HomeView {
                 maxWidth: .infinity,
                 minHeight: 120
             )
-            .background(.white)
-            .clipShape(
-                RoundedRectangle(cornerRadius: 24)
-            )
+            .glassCardStyle()
         }
         .buttonStyle(.plain)
     }
@@ -229,8 +214,8 @@ extension HomeView {
             VStack(alignment: .leading, spacing: 8) {
                 
                 Text("Journal")
-                    .font(.headline)
-                    .foregroundColor(.black)
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .foregroundColor(Theme.textPrimary)
                 
                 Spacer()
                 
@@ -246,16 +231,7 @@ extension HomeView {
                 maxWidth: .infinity,
                 minHeight: 140
             )
-            .background(
-                RoundedRectangle(cornerRadius: 24)
-                    .fill(
-                        Color(
-                            red: 1.0,
-                            green: 0.95,
-                            blue: 0.96
-                        )
-                    )
-            )
+            .glassCardStyle()
         }
         .buttonStyle(.plain)
     }
@@ -281,11 +257,9 @@ extension HomeView {
             }
         }
         .padding(18)
-        .background(.white)
-        .clipShape(
-            RoundedRectangle(cornerRadius: 24)
-        )
+        .glassCardStyle()
     }
+    
 }
 
 // MARK: - Logic

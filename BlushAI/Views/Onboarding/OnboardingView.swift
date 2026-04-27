@@ -18,7 +18,7 @@ struct OnboardingView: View {
     @State private var bmi = 21.0
     @State private var hasPCOS = false
     @State private var sleepHours = 7.0
-    @State private var stress = 5.0
+    @State private var stress = 5
 
     @State private var lastPeriodDate = Date()
     @State private var avgCycleLength = 28
@@ -35,10 +35,11 @@ struct OnboardingView: View {
                     VStack(spacing: 24) {
 
                         Text("Welcome to Blush")
-                            .font(.largeTitle.bold())
+                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                            .foregroundColor(Theme.textPrimary)
 
                         Text("Let's personalize your cycle insights.")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Theme.textSecondary)
 
                         Group {
                             fieldCard(
@@ -54,11 +55,14 @@ struct OnboardingView: View {
                             fieldCard(
                                 title: "Age"
                             ) {
-                                Stepper(
-                                    "\(age) years",
-                                    value: $age,
-                                    in: 13...55
-                                )
+                                Picker("Age", selection: $age) {
+                                    ForEach(13...55, id: \.self) { a in
+                                        Text("\(a) years").tag(a)
+                                    }
+                                }
+                                .pickerStyle(.wheel)
+                                .frame(height: 100)
+                                .clipped()
                             }
 
                             fieldCard(
@@ -95,12 +99,14 @@ struct OnboardingView: View {
                             fieldCard(
                                 title: "Stress Level"
                             ) {
-                                Slider(
-                                    value: $stress,
-                                    in: 1...10,
-                                    step: 0.5
-                                )
-                                Text("\(stress, specifier: "%.1f") / 10")
+                                Picker("Stress Level", selection: $stress) {
+                                    ForEach(1...10, id: \.self) { s in
+                                        Text("\(s) / 10").tag(s)
+                                    }
+                                }
+                                .pickerStyle(.wheel)
+                                .frame(height: 100)
+                                .clipped()
                             }
 
                             fieldCard(
@@ -133,7 +139,7 @@ struct OnboardingView: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(.pink)
+                                .background(Theme.accentPink)
                                 .clipShape(
                                     RoundedRectangle(
                                         cornerRadius: 18
@@ -144,6 +150,7 @@ struct OnboardingView: View {
                     }
                     .padding()
                 }
+                .background(AppBackground())
             }
         }
     }
@@ -155,17 +162,13 @@ struct OnboardingView: View {
 
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
-                .font(.headline)
+                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .foregroundColor(Theme.textPrimary)
 
             content()
         }
-        .padding()
-        .background(.white)
-        .clipShape(
-            RoundedRectangle(
-                cornerRadius: 20
-            )
-        )
+        .padding(20)
+        .glassCardStyle()
     }
 
     func saveUser() {
@@ -176,7 +179,7 @@ struct OnboardingView: View {
             bmi: bmi,
             hasPCOS: hasPCOS,
             sleepHours: sleepHours,
-            baselineStress: stress
+            baselineStress: Double(stress)
         )
 
         context.insert(profile)
@@ -186,7 +189,7 @@ struct OnboardingView: View {
             cycleLength: avgCycleLength,
             painLevel: 4,
             moodScore: 7,
-            stressScore: stress,
+            stressScore: Double(stress),
             sleepHours: sleepHours,
             flowLevel: 2
         )
