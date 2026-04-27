@@ -28,7 +28,7 @@ struct JournalView: View {
         
         ScrollView(showsIndicators: false) {
             
-            VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: 15) {
                 
                 header
                 

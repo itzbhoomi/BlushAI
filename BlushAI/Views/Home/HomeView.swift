@@ -104,7 +104,7 @@ extension HomeView {
     }
     
     var cycleCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 10) {
             
             Text("Next period in")
                 .font(.subheadline)
@@ -113,11 +113,11 @@ extension HomeView {
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 
                 Text("\(daysLeft)")
-                    .font(.system(size: 42, weight: .bold))
+                    .font(.system(size: 40, weight: .bold))
                     .foregroundColor(.pink)
                 
                 Text("days")
-                    .font(.system(size: 30, weight: .semibold))
+                    .font(.system(size: 25, weight: .semibold))
             }
             
             Text("Day \(cycleDay()) of your cycle")
@@ -137,8 +137,7 @@ extension HomeView {
                     currentPhase.rawValue,
                     systemImage: "sparkles"
                 )
-                
-                Spacer()
+         
                 
                 Text("Risk: \(risk.rawValue)")
             }
@@ -146,7 +145,7 @@ extension HomeView {
             .foregroundColor(.secondary)
             .padding(.top, 4)
         }
-        .padding(18)
+        .padding(15)
         .background(
             RoundedRectangle(cornerRadius: 26)
                 .fill(
@@ -211,7 +210,7 @@ extension HomeView {
             .padding(18)
             .frame(
                 maxWidth: .infinity,
-                minHeight: 140
+                minHeight: 120
             )
             .background(.white)
             .clipShape(
@@ -227,7 +226,7 @@ extension HomeView {
             JournalView()
         } label: {
             
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 8) {
                 
                 Text("Journal")
                     .font(.headline)
