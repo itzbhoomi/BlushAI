@@ -94,3 +94,6 @@ struct TabButtonStyle: ButtonStyle {
     }
 }
 
+#Preview {
+    ContentView()
+}

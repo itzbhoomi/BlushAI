@@ -76,12 +76,29 @@ extension CalendarView {
     var calendarGrid: some View {
         let days = generateDays()
         
-        return LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 10) {
-            ForEach(Array(days.enumerated()), id: \.offset) { index, date in
-                if let date = date {
-                    dayCell(for: date)
-                } else {
-                    Color.clear.frame(height: 44)
+        let columns = Array(repeating: GridItem(.flexible()), count: 7)
+        
+        return VStack(spacing: 8) {
+            
+            // ✅ WEEKDAY HEADER (separate grid = no breaking)
+            LazyVGrid(columns: columns, spacing: 10) {
+                let days = ["S","M","T","W","T","F","S"]
+                ForEach(Array(days.enumerated()), id: \.offset) { index, day in
+                    Text(day)
+                        .font(.custom("Sniglet-ExtraBold", size: 13))
+                        .foregroundStyle(Theme.textPrimary.opacity(0.7))
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            
+            // ✅ ACTUAL CALENDAR GRID
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(Array(days.enumerated()), id: \.offset) { _, date in
+                    if let date = date {
+                        dayCell(for: date)
+                    } else {
+                        Color.clear.frame(height: 44)
+                    }
                 }
             }
         }
