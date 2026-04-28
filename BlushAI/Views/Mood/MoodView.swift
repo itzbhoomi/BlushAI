@@ -34,6 +34,7 @@ struct MoodView: View {
                 }
                 
                 Spacer()
+                Spacer()
             }
             .padding(.horizontal, 20)
             .padding(.top, 20)
@@ -45,7 +46,7 @@ struct MoodView: View {
     
     private var headerTitle: some View {
         Text("How are you feeling today?")
-            .font(.system(size: 28, weight: .bold, design: .rounded))
+            .font(.custom("Sniglet-ExtraBold", size: 28))
             .foregroundStyle(Theme.textPrimary)
             .multilineTextAlignment(.center)
     }
@@ -53,15 +54,15 @@ struct MoodView: View {
     private var alreadyLoggedView: some View {
         VStack(spacing: 20) {
             Text(selectedMood)
-                .font(.system(size: 80))
+                .font(.custom("Sniglet-Regular", size: 80))
             
             Text("You've already checked in today 💕")
-                .font(.system(size: 17))
+                .font(.custom("Sniglet-Regular", size: 17))
                 .foregroundStyle(Theme.textSecondary)
             
             VStack(alignment: .leading, spacing: 12) {
                 Text("Your Insight")
-                    .font(.headline)
+                    .font(.custom("Sniglet-ExtraBold", size: 17))
                     .foregroundStyle(Theme.accentPink)
                 
                 Text(cleanMarkdown(savedInsight()))
@@ -76,7 +77,7 @@ struct MoodView: View {
     
     private var moodSelectionView: some View {
         VStack(spacing: 28) {
-            HStack(spacing: 16) {
+            HStack(spacing: 5) {
                 ForEach(moods, id: \.self) { mood in
                     moodButton(mood)
                 }
@@ -90,7 +91,7 @@ struct MoodView: View {
             if !insight.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Your Insight")
-                        .font(.headline)
+                        .font(.custom("Sniglet-ExtraBold", size: 17))
                         .foregroundStyle(Theme.accentPink)
                     
                     Text(cleanMarkdown(insight))
@@ -129,7 +130,7 @@ struct MoodView: View {
             }
         } label: {
             Text(emoji)
-                .font(.system(size: 42))
+                .font(.custom("Sniglet-Regular", size: 42))
                 .frame(width: 72, height: 72)
                 .background(Theme.glassOverlay2)
                 .clipShape(Circle())

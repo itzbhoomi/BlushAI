@@ -14,7 +14,7 @@ struct PrimaryButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .fontWeight(.semibold)
+                .font(.custom("Sniglet-ExtraBold", size: 17))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding()

@@ -19,7 +19,7 @@ struct ContentView: View {
         if profiles.isEmpty {
             OnboardingView()
         } else {
-            ZStack(alignment: .bottom) {
+            ZStack() {
                 
                 TabView(selection: $selectedTab) {
                     HomeView()
@@ -39,7 +39,9 @@ struct ContentView: View {
                         .toolbar(.hidden, for: .tabBar)
                 }
                 
-                floatingTabBar
+                .safeAreaInset(edge: .bottom, spacing: 0) {
+                    floatingTabBar
+                }
             }
             .ignoresSafeArea(.keyboard, edges: .bottom)
         }
@@ -55,16 +57,17 @@ struct ContentView: View {
             Spacer()
             tabButton(icon: "person.fill", tag: 3)
         }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 5)
+        .padding(.horizontal, 40)
+        .padding(.vertical, 10) // keep tap comfort
         .background(
             Color(red: 255/255, green: 240/255, blue: 245/255).opacity(0.72)
         )
         .background(.ultraThinMaterial)
         .clipShape(Capsule())
-        .padding(.horizontal, 40)
-        .padding(.bottom, 10)
+        .padding(.horizontal, 10)
+        .offset(y: 15)
     }
+        
     
     func tabButton(icon: String, tag: Int) -> some View {
         Button {
@@ -73,7 +76,7 @@ struct ContentView: View {
             }
         } label: {
             Image(systemName: icon)
-                .font(.system(size: 22, weight: selectedTab == tag ? .medium : .regular))
+                .font(.custom(selectedTab == tag ? "Sniglet-ExtraBold" : "Sniglet-Regular", size: 22))
                 .foregroundColor(selectedTab == tag ? Theme.accentPink : Theme.textMuted)
                 .scaleEffect(selectedTab == tag ? 1.15 : 1.0)
                 .frame(width: 44, height: 44)

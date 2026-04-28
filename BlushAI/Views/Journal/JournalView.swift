@@ -149,7 +149,7 @@ extension JournalView {
         VStack(alignment: .leading, spacing: 8) {
             
             Text("Gentle Check-In")
-                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .font(.custom("Sniglet-ExtraBold", size: 28))
                 .foregroundColor(Theme.textPrimary)
             
             Text("Reflect in taps, not paragraphs.")
@@ -166,7 +166,7 @@ extension JournalView {
         VStack(alignment: .leading, spacing: 12) {
             
             Text(title)
-                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .font(.custom("Sniglet-Regular", size: 17))
                 .foregroundColor(Theme.textPrimary)
             
             FlexibleButtons(
@@ -187,7 +187,7 @@ extension JournalView {
         VStack(alignment: .leading, spacing: 12) {
             
             Text(title)
-                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .font(.custom("Sniglet-Regular", size: 17))
                 .foregroundColor(Theme.textPrimary)
             
             TextField(
@@ -215,7 +215,7 @@ extension JournalView {
                     saveJournal()
                 } label: {
                     Text("Save Reflection 💕")
-                        .fontWeight(.semibold)
+                        .font(.custom("Sniglet-ExtraBold", size: 17))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -229,7 +229,7 @@ extension JournalView {
             } else {
                 
                 Text("Saved ✓")
-                    .font(.subheadline)
+                    .font(.custom("Sniglet-Regular", size: 15))
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 4)
@@ -279,7 +279,7 @@ struct FlexibleButtons: View {
                 } label: {
                     
                     Text(item)
-                        .font(.subheadline)
+                        .font(.custom("Sniglet-Regular", size: 15))
                         .foregroundColor(
                             selection == item
                             ? Theme.accentPink

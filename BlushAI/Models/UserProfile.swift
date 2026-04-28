@@ -46,6 +46,7 @@ final class CycleLog {
     var stressScore: Double
     var sleepHours: Double
     var flowLevel: Int
+    var periodLength: Int
 
     init(
         startDate: Date,
@@ -54,7 +55,8 @@ final class CycleLog {
         moodScore: Int,
         stressScore: Double,
         sleepHours: Double,
-        flowLevel: Int
+        flowLevel: Int,
+    periodLength: Int = 4
     ) {
         self.startDate = startDate
         self.cycleLength = cycleLength
@@ -63,5 +65,6 @@ final class CycleLog {
         self.stressScore = stressScore
         self.sleepHours = sleepHours
         self.flowLevel = flowLevel
+        self.periodLength = 0
     }
 }

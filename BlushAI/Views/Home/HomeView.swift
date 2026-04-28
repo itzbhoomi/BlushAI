@@ -20,6 +20,8 @@ struct HomeView: View {
   
     @State private var selectedMood = ""
     @State private var hasLoggedMoodToday = false
+    
+    @State private var showFullMotivation = false
   
     @Query var profiles: [UserProfile]
   
@@ -72,7 +74,7 @@ extension HomeView {
                     .font(Font.custom("Sniglet-Regular", size: 28))
     
                
-                Text("You're doing amazing, let's make today beautiful 🌸")
+                Text("You're doing amazing, let's make today beautiful 🎀")
                     .font(Font.custom("Sniglet-Regular", size: 17))
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -84,7 +86,7 @@ extension HomeView {
                 // Notification action (can be expanded later)
             } label: {
                 Image(systemName: "bell.fill")
-                    .font(.title3)
+                    .font(.custom("Sniglet-ExtraBold", size: 20))
                     .foregroundStyle(Theme.accentPink)
                     .padding(10)
                     .background(.ultraThinMaterial, in: Circle())
@@ -110,13 +112,36 @@ extension HomeView {
                         .foregroundStyle(Theme.textPrimary)
                    
                     Text(currentPhase.rawValue)
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.custom("Sniglet-ExtraBold", size: 17))
                         .foregroundStyle(Theme.accentPink)
                    
                     Text(phaseMotivation())
                         .font(Font.custom("Sniglet-Regular", size: 15))
                         .fixedSize(horizontal: false, vertical: true)
                         .lineLimit(3)
+                        .onTapGesture {
+                            showFullMotivation = true
+                        }
+                    
+                        .sheet(isPresented: $showFullMotivation) {
+                            VStack(spacing: 5) {
+                                Text("Your Phase Insight")
+                                    .font(.title3.bold())
+                                
+                                Text(phaseMotivation())
+                                    .font(Font.custom("Sniglet-Regular", size: 16))
+                                    .multilineTextAlignment(.center)
+                                
+                                Button("Close") {
+                                    showFullMotivation = false
+                                }
+                                .padding(.top, 10)
+                            }
+                            .padding()
+                            .presentationDetents([.medium]) // 👈 controls height
+                            .presentationDragIndicator(.visible)
+                            
+                        }
                     
                     HStack(spacing: 6) {
                                             Text("Risk:")
@@ -127,7 +152,6 @@ extension HomeView {
                                                 .foregroundStyle(riskColor())
                                         }
                     .font(Font.custom("Sniglet-Regular", size: 12))
-
                 }
                
                 Spacer()
@@ -146,10 +170,10 @@ extension HomeView {
                     
                     VStack(spacing: 2) {
                         Text("\(cycleDay())")
-                            .font(.system(size: 28, weight: .bold))
+                            .font(.custom("Sniglet-ExtraBold", size: 28))
                             .foregroundStyle(Theme.accentPink)
                         Text("of \(Int(predictedCycleLength))")
-                            .font(.system(size: 13))
+                            .font(.custom("Sniglet-Regular", size: 13))
                             .foregroundStyle(Theme.textSecondary)
 
                     }
@@ -162,8 +186,8 @@ extension HomeView {
                 // Navigate to CalendarView
                 // You can wrap this in NavigationLink or use navigation destination
             } label: {
-                Text("View Full Cycle")
-                    .font(.system(size: 16, weight: .semibold))
+                Text("Log Period")
+                    .font(.custom("Sniglet-ExtraBold", size: 16))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 15)
@@ -197,25 +221,25 @@ extension HomeView {
             VStack(spacing: 12) {
                 // Title
                 Label("Mood Check", systemImage: "face.smiling.fill")
-                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .font(.custom("Sniglet-ExtraBold", size: 15))
                     .foregroundStyle(Theme.accentPink)
                 
                 
                 // Mood Emoji / State
                 if hasLoggedMoodToday {
                     Text(selectedMood)
-                        .font(.system(size: 50))
+                        .font(.custom("Sniglet-Regular", size: 50))
                     
                     Text(moodDescription(for: selectedMood))
-                        .font(.system(size: 12))
+                        .font(.custom("Sniglet-Regular", size: 12))
                         .foregroundStyle(Theme.textSecondary)
                         .multilineTextAlignment(.center)
                 } else {
                     Text("😊")
-                        .font(.system(size: 50))
+                        .font(.custom("Sniglet-Regular", size: 50))
                     
                     Text("How are you feeling?")
-                        .font(.system(size: 14))
+                        .font(.custom("Sniglet-Regular", size: 14))
                         .foregroundStyle(Theme.textSecondary)
                         .multilineTextAlignment(.center)
                 }
@@ -223,8 +247,7 @@ extension HomeView {
                 
                 // Track Mood Button
                 Text("Track Mood")
-                    .font(.caption)
-                    .fontWeight(.semibold)
+                    .font(.custom("Sniglet-Regular", size: 12))
                     .foregroundStyle(Theme.accentPink)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
@@ -246,20 +269,20 @@ extension HomeView {
         } label: {
             VStack(alignment: .leading, spacing: 12) {
                 Label("Journal", systemImage: "book.pages.fill")
-                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .font(.custom("Sniglet-ExtraBold", size: 17))
                     .foregroundStyle(Theme.accentPink)
                
                 Text("Write It Out")
-                    .font(.title3.bold())
+                    .font(.custom("Sniglet-ExtraBold", size: 20))
                     .foregroundStyle(Theme.textPrimary)
                
                 Text("Release your thoughts and feel lighter.")
-                    .font(.system(size: 14))
+                    .font(.custom("Sniglet-Regular", size: 14))
                     .foregroundStyle(Theme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
        
                 Text("New Entry")
-                    .font(.caption)
+                    .font(.custom("Sniglet-Regular", size: 12))
                     .foregroundStyle(Theme.accentPink)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
@@ -278,18 +301,18 @@ extension HomeView {
     var insightCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             Label("Today's Insight", systemImage: "sparkles")
-                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .font(.custom("Sniglet-ExtraBold", size: 17))
                 .foregroundStyle(Theme.accentPink)
            
             Text(insight)
-                .font(.system(size: 16))
+                .font(.custom("Sniglet-Regular", size: 16))
                 .foregroundStyle(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
            
             HStack {
                 Spacer()
                 Text("Keep showing up for yourself 💕")
-                    .font(.caption)
+                    .font(.custom("Sniglet-Regular", size: 12))
                     .foregroundStyle(Theme.textSecondary)
             }
         }

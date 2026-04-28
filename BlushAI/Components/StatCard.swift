@@ -13,8 +13,8 @@ struct StatCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title).font(.caption).foregroundColor(.secondary)
-            Text(value).font(.title3.bold())
+            Text(title).font(.custom("Sniglet-Regular", size: 12)).foregroundColor(.secondary)
+            Text(value).font(.custom("Sniglet-ExtraBold", size: 20))
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
