@@ -427,36 +427,23 @@ extension HomeView {
         guard let profile = profiles.first, let latestLog = logs.first else { return }
        
         userName = profile.name
-        predictedCycleLength = PredictionService.shared.predictCycleLength(
-            cycleNumber: logs.count,
-            cycleLengthDays: Double(latestLog.cycleLength),
-            prevCycleLength: Double(latestLog.cycleLength),
-            painLevel: latestLog.painLevel,
-            moodScore: latestLog.moodScore,
-            stressScoreCycle: latestLog.stressScore,
-            sleepHoursCycle: latestLog.sleepHours,
-            energyLevel: 7,
-            concentrationScore: 7,
-            overallHealthScore: 8,
-            age: profile.age,
-            bmi: profile.bmi,
-            sleepHours: profile.sleepHours,
-            stressScoreBaseline: profile.baselineStress,
-            avgLast3Cycles: averageLast3(),
-            stdLast6Cycles: stdLast6(),
-            cyclePhase: 2,
-            flowLevel: latestLog.flowLevel,
-            pmsSymptoms: 0,
-            dietQuality: 2,
-            exerciseFrequency: 2,
-            birthControlUse: 0,
-            pcosDiagnosed: profile.hasPCOS ? 1 : 0
-        )
-       
-        nextDate = PredictionService.shared.predictNextDate(
-            lastStartDate: latestLog.startDate,
-            predictedCycleLength: predictedCycleLength
-        )
+        if let predictedDate = CyclePredictionEngine.shared.nextPeriodDate(from: logs) {
+            
+            nextDate = predictedDate
+            
+            // derive cycle length from prediction
+            if let lastLog = logs.first {
+                let diff = Calendar.current.dateComponents(
+                    [.day],
+                    from: lastLog.startDate,
+                    to: predictedDate
+                ).day ?? 28
+                
+                predictedCycleLength = Double(max(diff, 1))
+            }
+            
+            daysLeft = max(0, DateUtils.daysUntil(predictedDate))
+        }
        
         daysLeft = max(0, DateUtils.daysUntil(nextDate))
        

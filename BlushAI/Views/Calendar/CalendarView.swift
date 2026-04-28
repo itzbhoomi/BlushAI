@@ -1,11 +1,3 @@
-//
-//  CalendarView 2.swift
-//  BlushAI
-//
-//  Created by Bhoomi on 28/04/26.
-//
-
-
 import SwiftUI
 import SwiftData
 
@@ -16,6 +8,11 @@ struct CalendarView: View {
     
     @State private var insight: String = "Tap a date to see your insight 🌸"
     @State private var showLogSheet = false
+    @State private var showDailyLogSheet = false
+
+    // ✅ FIXED QUERY
+    @Query(sort: \DailyLog.date, order: .reverse)
+    var dailyLogs: [DailyLog]
     
     @Query(sort: \CycleLog.startDate, order: .reverse)
     var logs: [CycleLog]
@@ -40,12 +37,10 @@ struct CalendarView: View {
             .onAppear { loadInsight() }
         }
         .font(.custom("Sniglet-Regular", size: 14))
-        .onChange(of: logs.count) { newValue in
-            print("📊 Logs updated. Count:", newValue)
-        }
     }
 }
 
+// MARK: - HEADER
 extension CalendarView {
     
     var header: some View {
@@ -55,7 +50,6 @@ extension CalendarView {
             } label: {
                 Image(systemName: "chevron.left")
                     .padding(8)
-                    .contentShape(Rectangle())
             }
             
             Spacer()
@@ -70,20 +64,20 @@ extension CalendarView {
             } label: {
                 Image(systemName: "chevron.right")
                     .padding(8)
-                    .contentShape(Rectangle())
             }
         }
         .foregroundStyle(Theme.textPrimary)
     }
 }
 
+// MARK: - CALENDAR GRID
 extension CalendarView {
     
     var calendarGrid: some View {
         let days = generateDays()
         
         return LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 10) {
-            ForEach(Array(days.enumerated()), id: \.offset) { _, date in
+            ForEach(Array(days.enumerated()), id: \.offset) { index, date in
                 if let date = date {
                     dayCell(for: date)
                 } else {
@@ -96,21 +90,37 @@ extension CalendarView {
     func dayCell(for date: Date) -> some View {
         let calendar = Calendar.current
         
-        let isSelected = calendar.isDate(date, inSameDayAs: selectedDate)
-        let isToday = calendar.isDateInToday(date)
-        let isPast = calendar.startOfDay(for: date) <= calendar.startOfDay(for: Date())
+        let normalizedDate = calendar.startOfDay(for: date)
+        let isSelected = calendar.isDate(normalizedDate, inSameDayAs: selectedDate)
+        let isToday = calendar.isDateInToday(normalizedDate)
+        let isPast = normalizedDate <= calendar.startOfDay(for: Date())
         
-        let type = CycleEngine.dayType(for: date, logs: logs)
+        let latestLog = logs.first
+        let type = latestLog.map {
+            CycleEngine.dayType(for: normalizedDate, log: $0)
+        } ?? .normal
+        
+        let todayLog = dailyLogs.first {
+            Calendar.current.isDate($0.date, inSameDayAs: normalizedDate)
+        }
 
-        print("📅 Checking date:", date, "Type:", type, "Logs count:", logs.count)
+        let hasDailyLog = todayLog != nil
         
         return VStack(spacing: 4) {
-            Text("\(calendar.component(.day, from: date))")
+            Text("\(calendar.component(.day, from: normalizedDate))")
                 .foregroundStyle(isSelected ? .white : Theme.textPrimary)
             
-            Circle()
-                .fill(CycleEngine.color(for: type))
-                .frame(width: 6, height: 6)
+            ZStack {
+                Circle()
+                    .fill(CycleEngine.color(for: type))
+                    .frame(width: 6, height: 6)
+                
+                if hasDailyLog {
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 3, height: 3)
+                }
+            }
         }
         .frame(maxWidth: .infinity, minHeight: 44)
         .background(
@@ -120,42 +130,65 @@ extension CalendarView {
                 } else {
                     backgroundColor(for: type, isToday: isToday)
                 }
+                
+                if hasDailyLog {
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.white.opacity(0.25), lineWidth: 1)
+                }
             }
         )
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .opacity(isPast ? 1 : 0.4)
         .onTapGesture {
             if isPast {
-                selectedDate = date
+                selectedDate = normalizedDate
             }
-        }
-    }
-    
-    func backgroundColor(for type: DayType, isToday: Bool) -> Color {
-        switch type {
-        case .period:
-            return Color.red.opacity(0.2)
-        case .fertile:
-            return Color.purple.opacity(0.15)
-        case .ovulation:
-            return Color.blue.opacity(0.25)
-        case .normal:
-            return isToday ? Theme.accentPink.opacity(0.2) : .clear
         }
     }
 }
 
+// MARK: - SELECTED DAY CARD
 extension CalendarView {
     
     var selectedDayCard: some View {
         let calendar = Calendar.current
-        let isPast = calendar.startOfDay(for: selectedDate) <= calendar.startOfDay(for: Date())
+        let normalizedDate = calendar.startOfDay(for: selectedDate)
+        let isPast = normalizedDate <= calendar.startOfDay(for: Date())
         
-        let type = CycleEngine.dayType(for: selectedDate, logs: logs)
+        let latestLog = logs.first
+        let type = latestLog.map {
+            CycleEngine.dayType(for: normalizedDate, log: $0)
+        } ?? .normal
         
         return VStack(alignment: .leading, spacing: 10) {
             
-            Text(dateString(selectedDate))
+            VStack(alignment: .leading, spacing: 4) {
+                
+                Text(dateString(normalizedDate))
+                    .font(.custom("Sniglet-ExtraBold", size: 18))
+                
+                if let nextDate = predictedNextPeriodDate() {
+                    
+                    let days = Calendar.current.dateComponents(
+                        [.day],
+                        from: normalizedDate,
+                        to: nextDate
+                    ).day ?? 0
+                    
+                    Text(
+                        days <= 0
+                        ? "Period expected soon"
+                        : "Next period in \(days) days"
+                    )
+                    .font(.custom("Sniglet-Regular", size: 12))
+                    .foregroundStyle(Theme.textSecondary)
+                    
+                } else {
+                    Text("Not enough data yet")
+                        .font(.custom("Sniglet-Regular", size: 12))
+                        .foregroundStyle(.secondary)
+                }
+            }
                 .font(.custom("Sniglet-ExtraBold", size: 18))
             
             Text(CycleEngine.phaseText(for: type))
@@ -165,16 +198,64 @@ extension CalendarView {
                 Text(insight)
                     .foregroundStyle(Theme.textSecondary)
                 
-                Text(moodForDate(selectedDate))
-                    .font(.custom("Sniglet-Regular", size: 13))
-                    .foregroundStyle(Theme.textSecondary)
+                let todayLog = dailyLogs.first {
+                    Calendar.current.isDate($0.date, inSameDayAs: normalizedDate)
+                }
+
+                if let log = todayLog
+                    {
+                    
+                    VStack(spacing: 14) {
+                        
+                        HStack {
+                            Text("Your Day 💗")
+                                .font(.custom("Sniglet-ExtraBold", size: 18))
+                            Spacer()
+                        }
+                        
+                        HStack(spacing: 5) {
+                            statCard(title: "Mood", value: log.mood, emoji: "😊", color: .pink)
+                            statCard(title: "Pain", value: log.pain, emoji: "😣", color: .red)
+                            statCard(title: "Energy", value: log.energy, emoji: "⚡️", color: .purple)
+                        }
+                        
+                        HStack(spacing: 5) {
+                            statCard(title: "Sleep", value: Int(log.sleep), emoji: "😴", color: .blue)
+                            statCard(title: "Stress", value: log.stress, emoji: "😵‍💫", color: .orange)
+                        }
+                    }
+                    .padding(14)
+                    .background(.white.opacity(0.15))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    
+                } else {
+                    
+                    // 👇 EMPTY STATE (IMPORTANT UX)
+                    VStack(spacing: 10) {
+                        Text("No check-in yet 🌸")
+                            .font(.custom("Sniglet-Regular", size: 13))
+                            .foregroundStyle(.secondary)
+                        
+                        Text("Tap below to log how you're feeling today")
+                            .font(.custom("Sniglet-Regular", size: 11))
+                            .foregroundStyle(.secondary.opacity(0.7))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(14)
+                    .background(.white.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
                 
-                Button("View Journal") {}
-                    .font(.custom("Sniglet-Regular", size: 12))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(.white)
-                    .clipShape(Capsule())
+                Button {
+                    showDailyLogSheet = true
+                } label: {
+                    Text(buttonText(for: type))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .background(Theme.accentGradient)
+                        .clipShape(Capsule())
+                }
                 
             } else {
                 Text("Future prediction based on your cycle")
@@ -184,9 +265,15 @@ extension CalendarView {
         .padding(18)
         .background(Theme.cardGradient)
         .clipShape(RoundedRectangle(cornerRadius: 22))
+        .sheet(isPresented: $showDailyLogSheet) {
+            DailyLogView(
+                selectedDate: Calendar.current.startOfDay(for: selectedDate)
+            )
+        }
     }
 }
 
+// MARK: - LOG BUTTON
 extension CalendarView {
     
     var logButton: some View {
@@ -194,7 +281,6 @@ extension CalendarView {
             showLogSheet = true
         } label: {
             Text("Log Period")
-                .font(.custom("Sniglet-ExtraBold", size: 16))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 15)
@@ -207,6 +293,7 @@ extension CalendarView {
     }
 }
 
+// MARK: - HELPERS
 extension CalendarView {
     
     func generateDays() -> [Date?] {
@@ -228,6 +315,32 @@ extension CalendarView {
         return days
     }
     
+    func predictedNextPeriodDate() -> Date? {
+        CyclePredictionEngine.shared.nextPeriodDate(from: logs)
+    }
+    
+    func backgroundColor(for type: DayType, isToday: Bool) -> Color {
+        switch type {
+        case .period:
+            return Color.red.opacity(0.2)
+        case .fertile:
+            return Color.purple.opacity(0.15)
+        case .ovulation:
+            return Color.blue.opacity(0.25)
+        case .normal:
+            return isToday ? Theme.accentPink.opacity(0.2) : .clear
+        }
+    }
+    
+    func buttonText(for type: DayType) -> String {
+        switch type {
+        case .period: return "Log Symptoms 🩸"
+        case .fertile: return "Log Feelings 🌿"
+        case .ovulation: return "Log Ovulation ✨"
+        case .normal: return "Daily Check-in 💗"
+        }
+    }
+    
     func monthYearString(from date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM yyyy"
@@ -239,9 +352,6 @@ extension CalendarView {
         formatter.dateFormat = "MMMM d"
         return formatter.string(from: date)
     }
-}
-
-extension CalendarView {
     
     func loadInsight() {
         let key = insightKey(for: selectedDate)
@@ -252,17 +362,6 @@ extension CalendarView {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         return "daily_insight_\(formatter.string(from: date))"
-    }
-    
-    func moodForDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        let key = "mood_\(formatter.string(from: date))"
-        
-        if UserDefaults.standard.bool(forKey: key) {
-            return UserDefaults.standard.string(forKey: "\(key)_emoji") ?? "😊"
-        }
-        return "No mood logged"
     }
 }
 
@@ -305,14 +404,11 @@ struct LogPeriodView: View {
     
     func save() {
         print("🟡 SAVE TAPPED")
-        print("Selected date:", selectedDate)
-        print("Existing logs count BEFORE:", logs.count)
         
-        // Check duplicate
         if logs.contains(where: {
             Calendar.current.isDate($0.startDate, inSameDayAs: selectedDate)
         }) {
-            print("⚠️ Duplicate log detected. Not saving.")
+            print("⚠️ Duplicate log")
             dismiss()
             return
         }
@@ -328,30 +424,33 @@ struct LogPeriodView: View {
             periodLength: periodLength
         )
         
-        print("🟢 Creating new log:")
-        print("Start:", newLog.startDate)
-        print("Cycle length:", newLog.cycleLength)
-        print("Period length:", newLog.periodLength)
-        
         context.insert(newLog)
         
         do {
             try context.save()
-            print("✅ SAVE SUCCESS")
-            
-            // DEBUG FETCH AFTER SAVE
-            let descriptor = FetchDescriptor<CycleLog>()
-            let allLogs = try context.fetch(descriptor)
-            print("📦 Total logs AFTER save:", allLogs.count)
-            
-            for log in allLogs {
-                print("➡️ Log:", log.startDate)
-            }
-            
+            print("✅ Saved period log")
             dismiss()
-            
         } catch {
-            print("❌ Failed to save:", error)
+            print("❌ Error:", error)
         }
     }
+}
+
+func statCard(title: String, value: Int, emoji: String, color: Color) -> some View {
+    VStack(spacing: 6) {
+        
+        Text(emoji)
+            .font(.system(size: 18))
+        
+        Text("\(value)")
+            .font(.custom("Sniglet-Regular", size: 16))
+        
+        Text(title)
+            .font(.custom("Sniglet-Regular", size: 11))
+            .foregroundStyle(.secondary)
+    }
+    .frame(maxWidth: .infinity)
+    .padding(.vertical, 10)
+    .background(color.opacity(0.12))
+    .clipShape(RoundedRectangle(cornerRadius: 12))
 }

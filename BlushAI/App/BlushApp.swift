@@ -21,7 +21,8 @@ struct BlushAIApp: App {
         }
         .modelContainer(for: [
             UserProfile.self,
-            CycleLog.self
+            CycleLog.self,
+            DailyLog.self
         ])
     }
 }

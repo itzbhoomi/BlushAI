@@ -2,8 +2,6 @@
 //  CycleEngine.swift
 //  BlushAI
 //
-//  Created by Bhoomi on 28/04/26.
-//
 
 import SwiftUI
 import Foundation
@@ -17,10 +15,10 @@ enum DayType {
 
 struct CycleEngine {
     
-    static func dayType(for date: Date, logs: [CycleLog]) -> DayType {
+    // ✅ Pass latest log directly (no sorting inside)
+    static func dayType(for date: Date, log: CycleLog?) -> DayType {
         
-        guard let log = logs.sorted(by: { $0.startDate > $1.startDate }).first else {
-            print("❌ No logs found")
+        guard let log else {
             return .normal
         }
         
@@ -31,30 +29,28 @@ struct CycleEngine {
         
         let diff = calendar.dateComponents([.day], from: start, to: target).day ?? 0
         
-        print("🧠 Using log:", start)
-        print("📅 Target:", target)
-        print("📏 Diff:", diff)
-        
+        // before cycle start
         if diff < 0 {
             return .normal
         }
         
         let day = diff % log.cycleLength
         
-        print("🔁 Cycle day:", day)
-        
         let periodLength = max(log.periodLength, 5)
-
-        if day < periodLength  {
+        
+        // period phase
+        if day < periodLength {
             return .period
         }
         
+        // ovulation
         let ovulationDay = log.cycleLength - 14
         
         if day == ovulationDay {
             return .ovulation
         }
         
+        // fertile window
         if (ovulationDay - 4)...(ovulationDay + 1) ~= day {
             return .fertile
         }

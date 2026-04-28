@@ -8,7 +8,19 @@ struct DailyLogView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) private var context
     
-    @Query var logs: [DailyLog]
+    @Query(sort: \DailyLog.date, order: .reverse)
+    var logs: [DailyLog]
+    
+    // ✅ Single source of truth for selected day (normalized)
+    var todayLog: DailyLog? {
+        let target = Calendar.current.startOfDay(for: selectedDate)
+        return logs.first {
+            Calendar.current.isDate(
+                Calendar.current.startOfDay(for: $0.date),
+                inSameDayAs: target
+            )
+        }
+    }
     
     @State private var mood: Int = 5
     @State private var pain: Int = 0
@@ -45,6 +57,58 @@ struct DailyLogView: View {
         .padding()
         .onAppear {
             loadExisting()
+        }
+    }
+}
+
+extension DailyLogView {
+    
+    func loadExisting() {
+        guard let existing = todayLog else { return }
+        
+        mood = existing.mood
+        pain = existing.pain
+        energy = existing.energy
+        sleep = existing.sleep
+        stress = existing.stress
+        
+        print("🔁 Loaded existing log")
+    }
+    
+    func save() {
+        print("🟡 Saving daily log")
+        
+        let normalizedDate = Calendar.current.startOfDay(for: selectedDate)
+        
+        if let existing = todayLog {
+            print("♻️ Updating existing log")
+            
+            existing.mood = mood
+            existing.pain = pain
+            existing.energy = energy
+            existing.sleep = sleep
+            existing.stress = stress
+            
+        } else {
+            print("🟢 Creating new log")
+            
+            let newLog = DailyLog(date: normalizedDate)
+            
+            newLog.mood = mood
+            newLog.pain = pain
+            newLog.energy = energy
+            newLog.sleep = sleep
+            newLog.stress = stress
+            
+            context.insert(newLog)
+        }
+        
+        do {
+            try context.save()
+            print("✅ Saved")
+            dismiss()
+        } catch {
+            print("❌ Error:", error)
         }
     }
 }
