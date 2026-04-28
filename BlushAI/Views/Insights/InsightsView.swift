@@ -16,6 +16,7 @@ struct InsightsView: View {
     
     enum InsightSheetType: Identifiable {
         case phase, risk, suggestions
+        case mood, sleep, energy
         var id: Self { self }
     }
     
@@ -91,127 +92,172 @@ extension InsightsView {
 extension InsightsView {
     
     var moodTrendCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            
-            Text("Mood 📈")
-                .font(.custom("Sniglet-ExtraBold", size: 16))
-            
-            let logsToUse = dailyLogs.isEmpty ? mockMoodLogs : Array(dailyLogs.suffix(7))
-            
-            if dailyLogs.isEmpty {
-                Text("Sample data ✨")
-                    .font(.caption)
+        Button {
+            selectedSheet = .mood
+        } label: {
+            VStack(alignment: .leading, spacing: 12) {
+                
+                HStack {
+                    Text("Mood 📈")
+                        .font(.custom("Sniglet-ExtraBold", size: 16))
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption.bold())
+                        .foregroundStyle(.secondary)
+                }
+                
+                let logsToUse = dailyLogs.isEmpty ? mockMoodLogs : Array(dailyLogs.suffix(7))
+                
+                if dailyLogs.isEmpty {
+                    Text("Sample data ✨")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                
+                Chart {
+                    ForEach(logsToUse, id: \.date) { log in
+                        LineMark(
+                            x: .value("Day", dayLabel(log.date)),
+                            y: .value("Mood", log.mood)
+                        )
+                        .interpolationMethod(.monotone)
+                        .foregroundStyle(Theme.accentPink)
+                        
+                        PointMark(
+                            x: .value("Day", dayLabel(log.date)),
+                            y: .value("Mood", log.mood)
+                        )
+                        .foregroundStyle(Theme.accentPink)
+                    }
+                }
+                .chartXAxis {
+                    AxisMarks(position: .bottom) { _ in
+                        AxisValueLabel().font(.caption2)
+                    }
+                }
+                .chartYAxis(.hidden)
+                .frame(height: 100)
+                
+                // AI Insight summary for Mood
+                let avgMood = logsToUse.reduce(0) { $0 + $1.mood } / max(1, logsToUse.count)
+                Text(avgMood >= 7 ? "AI Insight: Your mood is consistently high this week. ✨" : "AI Insight: Mood fluctuations detected. Get some rest. 🌿")
+                    .font(.custom("Sniglet-Regular", size: 11))
                     .foregroundStyle(.secondary)
             }
-            
-            Chart {
-                ForEach(logsToUse, id: \.date) { log in
-                    LineMark(
-                        x: .value("Day", dayLabel(log.date)),
-                        y: .value("Mood", log.mood)
-                    )
-                    .interpolationMethod(.monotone)
-                    .foregroundStyle(Theme.accentPink)
-                    
-                    PointMark(
-                        x: .value("Day", dayLabel(log.date)),
-                        y: .value("Mood", log.mood)
-                    )
-                    .foregroundStyle(Theme.accentPink)
-                }
-            }
-            .chartXAxis {
-                AxisMarks(position: .bottom) { _ in
-                    AxisValueLabel().font(.caption2)
-                }
-            }
-            .chartYAxis(.hidden)
-            .frame(height: 100)
-            
-            // AI Insight summary for Mood
-            let avgMood = logsToUse.reduce(0) { $0 + $1.mood } / max(1, logsToUse.count)
-            Text(avgMood >= 7 ? "AI Insight: Your mood is consistently high this week. ✨" : "AI Insight: Mood fluctuations detected. Get some rest. 🌿")
-                .font(.custom("Sniglet-Regular", size: 11))
-                .foregroundStyle(.secondary)
+            .padding(14)
+            .background(Theme.cardGradient)
+            .clipShape(RoundedRectangle(cornerRadius: 20))
         }
-        .padding(14)
-        .background(Theme.cardGradient)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .buttonStyle(.plain)
     }
 
     var sleepTrendCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            
-            Text("Sleep 😴")
-                .font(.custom("Sniglet-ExtraBold", size: 16))
-            
-            let logsToUse = dailyLogs.isEmpty ? mockMoodLogs : Array(dailyLogs.suffix(7))
-            
-            Chart {
-                ForEach(logsToUse, id: \.date) { log in
-                    BarMark(
-                        x: .value("Day", dayLabel(log.date)),
-                        y: .value("Sleep", log.sleep)
-                    )
-                    .foregroundStyle(LinearGradient(colors: [.blue, .cyan], startPoint: .bottom, endPoint: .top))
-                    .cornerRadius(4)
+        Button {
+            selectedSheet = .sleep
+        } label: {
+            VStack(alignment: .leading, spacing: 12) {
+                
+                HStack {
+                    Text("Sleep 😴")
+                        .font(.custom("Sniglet-ExtraBold", size: 16))
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption.bold())
+                        .foregroundStyle(.secondary)
                 }
-            }
-            .chartXAxis {
-                AxisMarks(position: .bottom) { _ in
-                    AxisValueLabel().font(.caption2)
+                
+                let logsToUse = dailyLogs.isEmpty ? mockMoodLogs : Array(dailyLogs.suffix(7))
+                
+                if dailyLogs.isEmpty {
+                    Text("Sample data ✨")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
+                
+                Chart {
+                    ForEach(logsToUse, id: \.date) { log in
+                        BarMark(
+                            x: .value("Day", dayLabel(log.date)),
+                            y: .value("Sleep", log.sleep)
+                        )
+                        .foregroundStyle(LinearGradient(colors: [.blue, .cyan], startPoint: .bottom, endPoint: .top))
+                        .cornerRadius(4)
+                    }
+                }
+                .chartXAxis {
+                    AxisMarks(position: .bottom) { _ in
+                        AxisValueLabel().font(.caption2)
+                    }
+                }
+                .chartYAxis(.hidden)
+                .frame(height: 120) // Adjusted height to sync masonry columns
             }
-            .chartYAxis(.hidden)
-            .frame(height: 80)
+            .padding(14)
+            .background(Theme.cardGradient)
+            .clipShape(RoundedRectangle(cornerRadius: 20))
         }
-        .padding(14)
-        .background(Theme.cardGradient)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .buttonStyle(.plain)
     }
     
     var energyTrendCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            
-            Text("Energy ⚡️")
-                .font(.custom("Sniglet-ExtraBold", size: 16))
-            
-            let logsToUse = dailyLogs.isEmpty ? mockMoodLogs : Array(dailyLogs.suffix(7))
-            
-            Chart {
-                ForEach(logsToUse, id: \.date) { log in
-                    AreaMark(
-                        x: .value("Day", dayLabel(log.date)),
-                        y: .value("Energy", log.energy)
-                    )
-                    .foregroundStyle(LinearGradient(colors: [.orange.opacity(0.6), .yellow.opacity(0.1)], startPoint: .top, endPoint: .bottom))
-                    .interpolationMethod(.catmullRom)
-                    
-                    LineMark(
-                        x: .value("Day", dayLabel(log.date)),
-                        y: .value("Energy", log.energy)
-                    )
-                    .foregroundStyle(.orange)
-                    .interpolationMethod(.catmullRom)
+        Button {
+            selectedSheet = .energy
+        } label: {
+            VStack(alignment: .leading, spacing: 12) {
+                
+                HStack {
+                    Text("Energy ⚡️")
+                        .font(.custom("Sniglet-ExtraBold", size: 16))
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption.bold())
+                        .foregroundStyle(.secondary)
                 }
-            }
-            .chartXAxis {
-                AxisMarks(position: .bottom) { _ in
-                    AxisValueLabel().font(.caption2)
+                
+                let logsToUse = dailyLogs.isEmpty ? mockMoodLogs : Array(dailyLogs.suffix(7))
+                
+                if dailyLogs.isEmpty {
+                    Text("Sample data ✨")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
+                
+                Chart {
+                    ForEach(logsToUse, id: \.date) { log in
+                        AreaMark(
+                            x: .value("Day", dayLabel(log.date)),
+                            y: .value("Energy", log.energy)
+                        )
+                        .foregroundStyle(LinearGradient(colors: [.orange.opacity(0.6), .yellow.opacity(0.1)], startPoint: .top, endPoint: .bottom))
+                        .interpolationMethod(.catmullRom)
+                        
+                        LineMark(
+                            x: .value("Day", dayLabel(log.date)),
+                            y: .value("Energy", log.energy)
+                        )
+                        .foregroundStyle(.orange)
+                        .interpolationMethod(.catmullRom)
+                    }
+                }
+                .chartXAxis {
+                    AxisMarks(position: .bottom) { _ in
+                        AxisValueLabel().font(.caption2)
+                    }
+                }
+                .chartYAxis(.hidden)
+                .frame(height: 90)
+                
+                // AI Insight summary for Energy
+                let avgEnergy = logsToUse.reduce(0) { $0 + $1.energy } / max(1, logsToUse.count)
+                Text(avgEnergy >= 6 ? "AI Insight: You have great energy reserves right now! 🚀" : "AI Insight: Energy is a bit low, take it easy. 🛌")
+                    .font(.custom("Sniglet-Regular", size: 11))
+                    .foregroundStyle(.secondary)
             }
-            .chartYAxis(.hidden)
-            .frame(height: 90)
-            
-            // AI Insight summary for Energy
-            let avgEnergy = logsToUse.reduce(0) { $0 + $1.energy } / max(1, logsToUse.count)
-            Text(avgEnergy >= 6 ? "AI Insight: You have great energy reserves right now! 🚀" : "AI Insight: Energy is a bit low, take it easy. 🛌")
-                .font(.custom("Sniglet-Regular", size: 11))
-                .foregroundStyle(.secondary)
+            .padding(14)
+            .background(Theme.cardGradient)
+            .clipShape(RoundedRectangle(cornerRadius: 20))
         }
-        .padding(14)
-        .background(Theme.cardGradient)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .buttonStyle(.plain)
     }
 }
 
@@ -430,7 +476,7 @@ extension InsightsView {
     @ViewBuilder
     func sheetContent(for type: InsightSheetType) -> some View {
         NavigationStack {
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
                     switch type {
                     case .phase:
@@ -439,6 +485,12 @@ extension InsightsView {
                         riskSheetBody
                     case .suggestions:
                         suggestionsSheetBody
+                    case .mood:
+                        moodSheetBody
+                    case .sleep:
+                        sleepSheetBody
+                    case .energy:
+                        energySheetBody
                     }
                 }
                 .padding(20)
@@ -458,6 +510,166 @@ extension InsightsView {
             }
         }
         .presentationDetents([.medium, .large])
+    }
+    
+    // --- Mood Sheet ---
+    var moodSheetBody: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Mood Trend Analysis 📈")
+                .font(.custom("Sniglet-ExtraBold", size: 28))
+                .foregroundStyle(Theme.accentPink)
+            
+            let logsToUse = dailyLogs.isEmpty ? mockMoodLogs : Array(dailyLogs.suffix(14))
+            
+            Chart {
+                ForEach(logsToUse, id: \.date) { log in
+                    LineMark(
+                        x: .value("Day", detailedDayLabel(log.date)),
+                        y: .value("Mood", log.mood)
+                    )
+                    .interpolationMethod(.monotone)
+                    .foregroundStyle(Theme.accentPink)
+                    
+                    PointMark(
+                        x: .value("Day", detailedDayLabel(log.date)),
+                        y: .value("Mood", log.mood)
+                    )
+                    .foregroundStyle(Theme.accentPink)
+                }
+            }
+            .chartXAxis {
+                AxisMarks(position: .bottom) { _ in
+                    AxisValueLabel().font(.caption2)
+                }
+            }
+            .frame(height: 250)
+            .padding(.vertical)
+            
+            Text("Detailed Breakdown")
+                .font(.custom("Sniglet-ExtraBold", size: 18))
+            
+            let avgMood = logsToUse.reduce(0) { $0 + $1.mood } / max(1, logsToUse.count)
+            Text("Your mood has been averaging around \(avgMood)/10 recently.")
+                .font(.custom("Sniglet-Regular", size: 15))
+                .foregroundStyle(Theme.textPrimary)
+            
+            VStack(alignment: .leading, spacing: 10) {
+                Text("✨ Extended AI Insight")
+                    .font(.custom("Sniglet-ExtraBold", size: 16))
+                Text(avgMood >= 7 ? "You are experiencing a sustained period of elevated mood! This correlates with good energy and stable stress levels. Keep prioritizing whatever you've been doing." : "There have been some fluctuations in your mood. Make sure you are setting aside time for hobbies, connecting with loved ones, and avoiding burnout.")
+                    .font(.custom("Sniglet-Regular", size: 14))
+            }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.accentGradient.opacity(0.15))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    // --- Sleep Sheet ---
+    var sleepSheetBody: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Sleep Trend Analysis 😴")
+                .font(.custom("Sniglet-ExtraBold", size: 28))
+                .foregroundStyle(.cyan)
+            
+            let logsToUse = dailyLogs.isEmpty ? mockMoodLogs : Array(dailyLogs.suffix(14))
+            
+            Chart {
+                ForEach(logsToUse, id: \.date) { log in
+                    BarMark(
+                        x: .value("Day", detailedDayLabel(log.date)),
+                        y: .value("Sleep", log.sleep)
+                    )
+                    .foregroundStyle(LinearGradient(colors: [.blue, .cyan], startPoint: .bottom, endPoint: .top))
+                    .cornerRadius(4)
+                }
+            }
+            .chartXAxis {
+                AxisMarks(position: .bottom) { _ in
+                    AxisValueLabel().font(.caption2)
+                }
+            }
+            .frame(height: 250)
+            .padding(.vertical)
+            
+            Text("Detailed Breakdown")
+                .font(.custom("Sniglet-ExtraBold", size: 18))
+            
+            let avgSleep = logsToUse.reduce(0.0) { $0 + $1.sleep } / Double(max(1, logsToUse.count))
+            Text("Your sleep duration averages \(String(format: "%.1f", avgSleep)) hours per night.")
+                .font(.custom("Sniglet-Regular", size: 15))
+                .foregroundStyle(Theme.textPrimary)
+            
+            VStack(alignment: .leading, spacing: 10) {
+                Text("✨ Extended AI Insight")
+                    .font(.custom("Sniglet-ExtraBold", size: 16))
+                Text(avgSleep >= 7.0 ? "You are getting an optimal amount of rest. This is highly beneficial for your hormonal balance and mood regulation." : "You might be running on a sleep deficit. Try to establish a calming bedtime routine and limit screen time before bed to improve your sleep quality.")
+                    .font(.custom("Sniglet-Regular", size: 14))
+            }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.cyan.opacity(0.15))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    // --- Energy Sheet ---
+    var energySheetBody: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Energy Trend Analysis ⚡️")
+                .font(.custom("Sniglet-ExtraBold", size: 28))
+                .foregroundStyle(.orange)
+            
+            let logsToUse = dailyLogs.isEmpty ? mockMoodLogs : Array(dailyLogs.suffix(14))
+            
+            Chart {
+                ForEach(logsToUse, id: \.date) { log in
+                    AreaMark(
+                        x: .value("Day", detailedDayLabel(log.date)),
+                        y: .value("Energy", log.energy)
+                    )
+                    .foregroundStyle(LinearGradient(colors: [.orange.opacity(0.6), .yellow.opacity(0.1)], startPoint: .top, endPoint: .bottom))
+                    .interpolationMethod(.catmullRom)
+                    
+                    LineMark(
+                        x: .value("Day", detailedDayLabel(log.date)),
+                        y: .value("Energy", log.energy)
+                    )
+                    .foregroundStyle(.orange)
+                    .interpolationMethod(.catmullRom)
+                }
+            }
+            .chartXAxis {
+                AxisMarks(position: .bottom) { _ in
+                    AxisValueLabel().font(.caption2)
+                }
+            }
+            .frame(height: 250)
+            .padding(.vertical)
+            
+            Text("Detailed Breakdown")
+                .font(.custom("Sniglet-ExtraBold", size: 18))
+            
+            let avgEnergy = logsToUse.reduce(0) { $0 + $1.energy } / max(1, logsToUse.count)
+            Text("Your energy level is sitting at an average of \(avgEnergy)/10.")
+                .font(.custom("Sniglet-Regular", size: 15))
+                .foregroundStyle(Theme.textPrimary)
+            
+            VStack(alignment: .leading, spacing: 10) {
+                Text("✨ Extended AI Insight")
+                    .font(.custom("Sniglet-ExtraBold", size: 16))
+                Text(avgEnergy >= 6 ? "Your energy reserves are great. Capitalize on this by tackling challenging tasks, working out, and being social." : "Your energy levels are on the lower side. Listen to your body and prioritize rest and recovery over strenuous activities.")
+                    .font(.custom("Sniglet-Regular", size: 14))
+            }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.orange.opacity(0.15))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     // --- Phase Sheet ---
@@ -657,14 +869,14 @@ extension InsightsView {
     var mockMoodLogs: [DailyLog] {
         let today = Calendar.current.startOfDay(for: Date())
         
-        return (0..<7).map { i in
+        return (0..<14).map { i in
             let date = Calendar.current.date(byAdding: .day, value: -i, to: today)!
             
             let log = DailyLog(date: date)
-            log.mood = [5,6,7,8,6,7,9][i]   // stable nice curve
+            log.mood = [5,6,7,8,6,7,9,6,5,4,5,7,8,9][i]
             log.pain = 2
-            log.energy = [4,5,6,8,7,5,8][i]
-            log.sleep = [6,7,8,7,6,7,8][i]
+            log.energy = [4,5,6,8,7,5,8,4,3,5,6,7,8,7][i]
+            log.sleep = [6,7,8,7,6,7,8,5,6,7,8,7,6,7][i]
             log.stress = 4
             
             return log
@@ -687,6 +899,12 @@ extension InsightsView {
     func dayLabel(_ date: Date) -> String {
         let f = DateFormatter()
         f.dateFormat = "E"
+        return f.string(from: date)
+    }
+    
+    func detailedDayLabel(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "M/d"
         return f.string(from: date)
     }
 }
