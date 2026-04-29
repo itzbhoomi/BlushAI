@@ -1,25 +1,23 @@
 # BlushAI 🌸
 
-BlushAI (formerly CycleSense) is an AI-powered menstrual and mental health tracking iOS application. It brings together sophisticated cycle predictions, daily wellness logging, and actionable AI insights into a premium, stunning "Liquid Glass Pink" interface. 
+BlushAI is an AI-powered menstrual and mental health tracking iOS application. It brings together sophisticated cycle predictions, daily wellness logging, and actionable AI insights into a premium, aesthetic interface. 
 
 BlushAI is designed to be more than just a period tracker—it's a holistic wellness coach that adapts to your unique cycle patterns and mental health needs.
 
 ## ✨ Features
 
-- **🌸 Liquid Glass Pink Aesthetic**: A cohesive, premium design system featuring glassmorphism, soft pink palettes, and elegant typography (using the `Sniglet` font family) for a beautiful, calming user experience.
 - **📅 Smart Cycle Tracking**: Log your periods and receive intelligent predictions about your cycle phases.
-- **📝 Daily Health & Mood Logging**: Comprehensive check-ins for mood, physical symptoms, and journaling to track your well-being holistically.
+- **🗓️ Interactive Calendar**: A clear, visual calendar to review past check-ins, moods, and cycle events at a glance.
+- **⚠️ Health Risk Assessments**: Proactive health insights delivered via full-width interactive cards and detailed modal sheets.
 - **📊 Advanced Insights & Analytics**: A dynamic masonry-style dashboard displaying line, area, and bar charts for cycle and health metrics. 
 - **🤖 AI Wellness Coach**: Personalized physical and mental health suggestions based on your historical cycle patterns and daily check-ins.
-- **⚠️ Health Risk Assessments**: Proactive health insights delivered via full-width interactive cards and detailed modal sheets.
-- **🗓️ Interactive Calendar**: A clear, visual calendar to review past check-ins, moods, and cycle events at a glance.
+- **📝 Daily Health & Mood Logging**: Comprehensive check-ins for mood, physical symptoms, and journaling to track your well-being holistically.
 
 ## 🛠️ Technology Stack
 
 - **Platform**: iOS 17+
 - **UI Framework**: SwiftUI
 - **Database**: SwiftData (`UserProfile`, `CycleLog`, `DailyLog`)
-- **Reactive Programming**: Combine
 - **Architecture**: MVVM / Modular View Extensions
 
 ## 🗂️ Project Structure
@@ -31,7 +29,7 @@ BlushAI is designed to be more than just a period tracker—it's a holistic well
 - `Services/`: Core business logic and integrations, including the `AIService` which powers the conversational AI and personalized suggestions.
 - `Components/`: Reusable, modular UI components (e.g., `StatCard`, custom pickers).
 - `Core/`: Foundational utilities, design system definitions (`Theme.swift`), and app-wide constants.
-- `Resources/`: Custom fonts (`Sniglet-Regular.ttf`, `Sniglet-ExtraBold.ttf`) and other static assets.
+- `Resources/`: csv data files used to train the ML model
 
 ## 🚀 Getting Started
 
